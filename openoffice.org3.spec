@@ -2160,8 +2160,8 @@ export DEFAULT_TO_ENGLISH_FOR_PACKING=1
 			--disable-mozilla \
 		%endif
 		--with-dynamic-xinerama \
-		--with-intro-bitmaps="\$SRCDIR/openintro_pld.bmp" \
-		--with-about-bitmaps="\$SRCDIR/openabout_pld.bmp" \
+##		--with-intro-bitmaps="\$SRCDIR/openintro_pld.bmp" \
+##		--with-about-bitmaps="\$SRCDIR/openabout_pld.bmp" \
 		--with-distro="${DISTRO}" \
 		--enable-gtk \
 		--%{!?with_kde:dis}%{?with_kde:en}able-kde \
@@ -2224,10 +2224,16 @@ export DEFAULT_TO_ENGLISH_FOR_PACKING=1
 		--with-drink=coffee \
 		--with-openldap \
 		--enable-split-app-modules \
-		--enable-split-opt-features
+		--enable-split-opt-features \
+		--with-openldap 
 
 OOO_VENDOR="PLD/Linux Team"; export OOO_VENDOR
-exit 1
+cd ..
+
+./bootstrap
+chmod u+x Linux*
+./LinuxX86Env.sh && solenv/bin/build.pl
+
 # this limits processing some files but doesn't limit parallel build
 # processes of main OOo build (since OOo uses it's own build system)
 %{__make} -j1 \
