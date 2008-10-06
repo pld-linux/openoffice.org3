@@ -47,15 +47,15 @@ Release:	0.1
 Epoch:		1
 License:	GPL/LGPL
 Group:		X11/Applications
-Source0:	http://gulus.usherbrooke.ca/pub/appl/openoffice/contrib/rc/3.0.0rc2/OOo_%{version}_src_system.tar.bz2
+Source0:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_core.tar.bz2
 # Source0-md5:	7312232d0118f4f825c8eaca92991fa8
-Source1:	http://gulus.usherbrooke.ca/pub/appl/openoffice/contrib/rc/3.0.0rc2/OOo_%{version}_src_core.tar.bz2
+Source1:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_system.tar.bz2
 # Source1-md5:	29c1e2fef9747e5cae52350b5c2a2260
-Source2:	http://gulus.usherbrooke.ca/pub/appl/openoffice/contrib/rc/3.0.0rc2/OOo_%{version}_src_binfilter.tar.bz2
+Source2:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_binfilter.tar.bz2
 # Source2-md5:	8c167a99d874c484edc900bcb5f46c97
-Source3:	http://gulus.usherbrooke.ca/pub/appl/openoffice/contrib/rc/3.0.0rc2/OOo_%{version}_src_l10n.tar.bz2
+Source3:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_l10n.tar.bz2
 # Source3-md5:	24081cb2e0295d7c7256a3c48b14ce51
-Source4:	http://gulus.usherbrooke.ca/pub/appl/openoffice/contrib/rc/3.0.0rc2/OOo_%{version}_src_extensions.tar.bz2
+Source4:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_extensions.tar.bz2
 # Source4-md5:	5044613b6241bc5cd5b97f637bc5f92c
 # patches applied in prep section
 ##Patch0:		%{name}-PLD.patch
@@ -2222,17 +2222,15 @@ export DEFAULT_TO_ENGLISH_FOR_PACKING=1
 		--with-build-version=%{version}-%{release} \
 		--with-tag=%{tag} \
 		--with-drink=coffee \
-		--with-openldap \
 		--enable-split-app-modules \
 		--enable-split-opt-features \
-		--with-openldap 
 
 OOO_VENDOR="PLD/Linux Team"; export OOO_VENDOR
 cd ..
 
 ./bootstrap
 chmod u+x Linux*
-./LinuxX86Env.sh && solenv/bin/build.pl
+./LinuxX86Env.sh && ./solenv/bin/build.pl
 
 # this limits processing some files but doesn't limit parallel build
 # processes of main OOo build (since OOo uses it's own build system)
