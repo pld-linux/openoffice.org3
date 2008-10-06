@@ -48,9 +48,9 @@ Epoch:		1
 License:	GPL/LGPL
 Group:		X11/Applications
 Source0:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_core.tar.bz2
-# Source0-md5:	7312232d0118f4f825c8eaca92991fa8
+# Source0-md5:	29c1e2fef9747e5cae52350b5c2a2260
 Source1:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_system.tar.bz2
-# Source1-md5:	29c1e2fef9747e5cae52350b5c2a2260
+# Source1-md5:	7312232d0118f4f825c8eaca92991fa8
 Source2:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_binfilter.tar.bz2
 # Source2-md5:	8c167a99d874c484edc900bcb5f46c97
 Source3:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_l10n.tar.bz2
