@@ -2033,8 +2033,7 @@ bash-completion for OpenOffice.org.
 bashowe uzupełnianie nazw dla Openoffice.org.
 
 %prep
-%setup -q -a1 -a2 -a3 -a4 -n OOO300_m8
-mv OOO300_m8/* .
+%setup -q -b1 -b2 -b3 -b4 -n OOO300_m8
 
 %build
 cd config_office
@@ -2229,8 +2228,8 @@ OOO_VENDOR="PLD/Linux Team"; export OOO_VENDOR
 cd ..
 
 ./bootstrap
-chmod u+x Linux*
-./LinuxX86Env.sh && ./solenv/bin/build.pl
+. ./LinuxX86Env.Set.sh
+./solenv/bin/build.pl
 
 # this limits processing some files but doesn't limit parallel build
 # processes of main OOo build (since OOo uses it's own build system)
