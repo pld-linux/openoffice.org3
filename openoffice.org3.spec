@@ -78,7 +78,7 @@ Source4:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_sr
 ##Patch1007:	%{name}-gcc42-swregion.diff
 URL:		http://www.openoffice.org/
 # http://securitytracker.com/alerts/2008/Aug/1020764.html
-#BuildRequires:	security(CVE-2008-3282)
+BuildRequires:	dmake
 BuildRequires:	/usr/bin/getopt
 BuildRequires:	GConf2-devel
 BuildRequires:	OpenGL-GLU-devel
@@ -2097,8 +2097,7 @@ export DEFAULT_TO_ENGLISH_FOR_PACKING=1
 		--infodir=%{_infodir} \
 		--x-libraries=%{?_x_libraries}%{!?_x_libraries:%{_libdir}} \
 		%{?configure_cache:--cache-file=%{configure_cache_file}} \
-		\
-		%ifarch %{ix86} \
+		%ifarch %{ix86}
 			--with-arch=x86 \
 		%endif
 		%ifarch ppc
@@ -2159,8 +2158,6 @@ export DEFAULT_TO_ENGLISH_FOR_PACKING=1
 			--disable-mozilla \
 		%endif
 		--with-dynamic-xinerama \
-##		--with-intro-bitmaps="\$SRCDIR/openintro_pld.bmp" \
-##		--with-about-bitmaps="\$SRCDIR/openabout_pld.bmp" \
 		--with-distro="${DISTRO}" \
 		--enable-gtk \
 		--%{!?with_kde:dis}%{?with_kde:en}able-kde \
@@ -2222,236 +2219,22 @@ export DEFAULT_TO_ENGLISH_FOR_PACKING=1
 		--with-tag=%{tag} \
 		--with-drink=coffee \
 		--enable-split-app-modules \
-		--enable-split-opt-features \
+		--enable-split-opt-features
 
 OOO_VENDOR="PLD/Linux Team"; export OOO_VENDOR
 cd ..
 
 ./bootstrap
-. ./LinuxX86Env.Set.sh
-./solenv/bin/build.pl
-
-# this limits processing some files but doesn't limit parallel build
-# processes of main OOo build (since OOo uses it's own build system)
-%{__make} -j1 \
-	ARCH_FLAGS="$SAFE_CFLAGS -fno-omit-frame-pointer -fno-strict-aliasing" \
-	ARCH_FLAGS_CC="$SAFE_CFLAGS -fno-omit-frame-pointer -fno-strict-aliasing" \
-	ARCH_FLAGS_CXX="$SAFE_CFLAGS -fno-omit-frame-pointer -fno-strict-aliasing -fpermissive -fvisibility-inlines-hidden" \
-	ARCH_FLAGS_OPT="$SAFE_CFLAGS"
-
-# hack for parallel build
-if [ $RPM_BUILD_NR_THREADS -gt 1 ]; then
-	doit=1
-	while [ "$doit" -eq 1 ]; do
-		echo "Waiting one more time..."
-		FCH=$(nice -n 20 find . -type f ! -mmin +3 -print 2> /dev/null | wc -l)
-		[ "$FCH" -eq 0 ] && doit=0 || sleep 30
-	done
-fi
+%ifarch %{ix86}
+	. ./LinuxX86Env.Set.sh
+%endif
+%ifarch %{x8664}
+	. ./LinuxX86-64Env.Set.sh
+%endif
+dmake
 
 %install
-if [ ! -f makeinstall.stamp -o ! -d $RPM_BUILD_ROOT ]; then
-	rm -rf makeinstall.stamp installed.stamp $RPM_BUILD_ROOT
-
-	# clean file listings
-	rm -f build/*_list.txt
-
-	# limit to single process installation, it's safe at least
-	%{__sed} -i -e 's#^BUILD_NCPUS=.*#BUILD_NCPUS=1#g' bin/setup
-
-	export DESTDIR=$RPM_BUILD_ROOT
-	export TMP="%{tmpdir}"
-	export TMPDIR="%{tmpdir}"
-	export TEMP="%{tmpdir}"
-	export DEFAULT_TO_ENGLISH_FOR_PACKING=1
-
-	%{__make} install \
-		DESTDIR=$RPM_BUILD_ROOT
-
-	# save orignal install layout
-	find $RPM_BUILD_ROOT -ls > ls.txt
-	touch makeinstall.stamp
-fi
-
-if [ ! -f installed.stamp ]; then
-	# do we need those? large comparing to png
-	rm -rf $RPM_BUILD_ROOT%{_datadir}/icons/hicolor/scalable/apps/*.svg
-
-	# is below comment true?
-	# OOo should not install the Vera fonts, they are Required: now
-	rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/share/fonts/truetype/*
-
-	# some libs creep in somehow
-	rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/program/libstl*.so*
-	rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/program/libsndfile*
-	#rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/program/libgcc3_uno.so*
-	rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/program/libstdc++*so*
-
-	rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/program/sopatchlevel.sh
-
-	# Remove setup log
-	rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/program/setup.log
-
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/share/xdg
-	rm -f $RPM_BUILD_ROOT%{_libdir}/%{name}/program/cde-open-url
-
-	%if %{without java}
-	# Java-releated bits
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/program/hid.lst
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/program/java-set-classpath
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/program/jvmfwk3rc
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/share/Scripts/beanshell
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/share/Scripts/javascript
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/share/xslt
-	%endif
-
-	%if %{with mono}
-	rm -f $RPM_BUILD_ROOT%{_libdir}/pkgconfig/mono-ooo-2.1.pc
-	%endif
-
-	# Remove dictionaries (in separate pkg)
-	rm -rf $RPM_BUILD_ROOT%{_libdir}/%{name}/share/dict/ooo/*
-	%if %{with system_myspell}
-	rmdir $RPM_BUILD_ROOT%{_libdir}/%{name}/share/dict/ooo
-	ln -s %{_datadir}/myspell $RPM_BUILD_ROOT%{_libdir}/%{name}/share/dict/ooo
-	%else
-	touch $RPM_BUILD_ROOT%{_libdir}/%{name}/share/dict/ooo/dictionary.lst
-	%endif
-
-	%if %{with mozilla}
-	install -d $RPM_BUILD_ROOT%{_browserpluginsdir}
-	ln -s %{_libdir}/%{name}/program/libnpsoplugin.so $RPM_BUILD_ROOT%{_browserpluginsdir}
-	%endif
-
-	# configs
-	install -d $RPM_BUILD_ROOT%{_sysconfdir}/%{name}
-	mv $RPM_BUILD_ROOT{%{_libdir}/%{name}/program,%{_sysconfdir}/%{name}}/sofficerc
-	ln -s %{_sysconfdir}/%{name}/sofficerc $RPM_BUILD_ROOT%{_libdir}/%{name}/program
-
-	# This breaks apps: The application cannot be started. The component manager is not available.
-	# Probably due to relative paths in unorc.
-	# mv $RPM_BUILD_ROOT{%{_libdir}/%{name}/program,%{_sysconfdir}/%{name}}/unorc
-	# ln -s %{_sysconfdir}/%{name}/unorc $RPM_BUILD_ROOT%{_libdir}/%{name}/program
-	# Use this instead:
-	ln -s %{_libdir}/%{name}/program/unorc $RPM_BUILD_ROOT%{_sysconfdir}/%{name}/unorc
-
-	perl -pi -e 's/^[       ]*LD_LIBRARY_PATH/# LD_LIBRARY_PATH/;s/export LD_LIBRARY_PATH/# export LD_LIBRARY_PATH/' \
-		$RPM_BUILD_ROOT%{_libdir}/%{name}/program/setup
-
-	chmod +x $RPM_BUILD_ROOT%{_libdir}/%{name}/program/*.so
-
-	install -d $RPM_BUILD_ROOT%{_datadir}/%{name}
-	# put share to %{_datadir} so we're able to produce noarch packages
-	mv $RPM_BUILD_ROOT%{_libdir}/%{name}/share $RPM_BUILD_ROOT%{_datadir}/%{name}
-	ln -s ../../share/%{name}/share $RPM_BUILD_ROOT%{_libdir}/%{name}/share
-	# more non-archidecture dependant nature data
-	mv $RPM_BUILD_ROOT%{_libdir}/%{name}/help $RPM_BUILD_ROOT%{_datadir}/%{name}
-	ln -s ../../share/%{name}/help $RPM_BUILD_ROOT%{_libdir}/%{name}/help
-	mv $RPM_BUILD_ROOT%{_libdir}/%{name}/licenses $RPM_BUILD_ROOT%{_datadir}/%{name}
-	ln -s ../../share/%{name}/licenses $RPM_BUILD_ROOT%{_libdir}/%{name}/licenses
-	mv $RPM_BUILD_ROOT%{_libdir}/%{name}/readmes $RPM_BUILD_ROOT%{_datadir}/%{name}
-	ln -s ../../share/%{name}/readmes $RPM_BUILD_ROOT%{_libdir}/%{name}/readmes
-
-	# fix python
-	sed -i -e 's|#!/bin/python|#!%{_bindir}/python|g' $RPM_BUILD_ROOT%{_libdir}/%{name}/program/*.py
-
-	# Copy fixed OpenSymbol to correct location
-	install -d $RPM_BUILD_ROOT%{_fontsdir}/TTF
-	install build/%{tag}/extras/source/truetype/symbol/opens___.ttf $RPM_BUILD_ROOT%{_fontsdir}/TTF
-
-	# Add in the regcomp tool since some people need it for 3rd party add-ons
-	cp -a build/%{tag}/solver/%{upd}/unxlng*.pro/bin/regcomp{,.bin} $RPM_BUILD_ROOT%{_libdir}/%{name}/program/
-
-	# Rename .desktop files to avoid conflicts with other applications .desktops
-	# TODO: make patch instead.
-	for a in $RPM_BUILD_ROOT%{_desktopdir}/*.desktop; do
-		d=$(dirname "$a")
-		f=$(basename "$a")
-		mv $a $d/oo$f
-	done
-
-	touch installed.stamp
-fi
-
-# Find out locales
-find_lang() {
-	local lang="$1"
-	echo "%%defattr(644,root,root,755)" > ${lang}.lang
-
-	# help files
-	if [ -f build/help_${lang}_list.txt ]; then
-		cat build/help_${lang}_list.txt >> ${lang}.lang
-	fi
-
-	lfile="build/lang_${lang}_list.txt"
-	if [ -f ${lfile} ]; then
-		lprefix=$(bin/openoffice-xlate-lang -p ${lang} 2>/dev/null || :)
-		longlang=$(bin/openoffice-xlate-lang -l ${lang} 2>/dev/null || :)
-		# share/*/${longlang}
-		if [ "x${longlang}" != "x" ] ; then
-			grep "^%%dir.*/${longlang}/\$" ${lfile} > tmp.lang || :
-		fi
-		# share/registry/res/${lang} (but en-US for en)
-		grep "^%%dir.*/res/${lang}[^/]*/\$" ${lfile} >> tmp.lang || :
-		# ... translate %dir into whole tree, handle special wordbook/english case
-		sed -e 's,^%%dir ,,;s,\(wordbook/english/\)$,\1soffice.dic,;s,/$,,' tmp.lang >> ${lang}.lang || :
-		# share/autocorr/acor${somecodes}.dat (if exist)
-		grep '/autocorr/acor.*dat$' ${lfile} >> ${lang}.lang || :
-		# user/config/* (if exist, without parent directory)
-		grep '/user/config/..*' ${lfile} >> ${lang}.lang || :
-		grep "/licenses/LICENSE_${lang}" ${lfile} >> ${lang}.lang || :
-		grep "/readmes/README_${lang}" ${lfile} >> ${lang}.lang || :
-		# lib/openoffice.org/presers/config/*.so[cdegh]
-		grep "/presets/config/.*_${lang}\.so[cdegh]$" ${lfile} >> ${lang}.lang || :
-		if [ "x${lprefix}" != "x" ] ; then
-			grep "/presets/config/${lprefix}.*\.so[cdegh]$" ${lfile} >> ${lang}.lang || :
-		fi
-		# lib/openoffice.org/program/resource/*.res
-		grep "/program/resource/.*${lang}.res$" ${lfile} >> ${lang}.lang || :
-		# lib/openoffice.org/share/autocorr/*.dat
-		grep "/share/autocorr/.*${lang}.dat$" ${lfile} >> ${lang}.lang || :
-		grep -i "/share/autocorr/.*${lang}-${lang}.dat$" ${lfile} >> ${lang}.lang || :
-		# lib/openoffice.org/share/autotext/$lang
-		grep "/share/autotext/${lang}$" ${lfile} >> ${lang}.lang || :
-		grep "/share/autotext/${lang}/" ${lfile} >> ${lang}.lang || :
-		# lib/openoffice.org/share/registry/res/$lang
-		grep "/share/registry/res/${lang}$" ${lfile} >> ${lang}.lang || :
-		grep "/share/registry/res/${lang}/" ${lfile} >> ${lang}.lang || :
-		# lib/openoffice.org/share/template/$lang
-		grep "/share/template/${lang}$" ${lfile} >> ${lang}.lang || :
-		grep "/share/template/${lang}/" ${lfile} >> ${lang}.lang || :
-		# lib/openoffice.org/share/template/wizard/letter/lang
-		grep "/share/template/wizard/letter/${lang}$" ${lfile} >> ${lang}.lang || :
-		grep "/share/template/wizard/letter/${lang}$" build/common_list.txt >> ${lang}.lang || :
-		grep "/share/template/wizard/letter/${lang}/" ${lfile} >> ${lang}.lang || :
-		grep "/share/template/wizard/letter/${lang}/" build/common_list.txt >> ${lang}.lang || :
-		# lib/openoffice.org/share/wordbook/$lang
-		grep "/share/wordbook/${lang}$" ${lfile} >> ${lang}.lang || :
-		grep "/share/wordbook/${lang}/" ${lfile} >> ${lang}.lang || :
-		# lib/openoffice.org/share/samples/$lang
-		grep "/share/samples/${lang}$" ${lfile} >> ${lang}.lang || :
-		grep "/share/samples/${lang}/" ${lfile} >> ${lang}.lang || :
-		grep "/help/${lang}$" ${lfile} >> ${lang}.lang || :
-		grep "/help/${lang}/" ${lfile} >> ${lang}.lang || :
-		grep "/share/config/soffice.cfg/modules/swform/accelerator/${lang}/" build/common_list.txt >> ${lang}.lang || :
-		grep "/share/config/soffice.cfg/modules/swreport/accelerator/${lang}/" build/common_list.txt >> ${lang}.lang || :
-		grep "/share/config/soffice.cfg/modules/swxform/accelerator/${lang}/" build/common_list.txt >> ${lang}.lang || :
-	fi
-}
-
-rm -f *.lang*
-langlist=$(ls build/lang_*_list.txt | sed -e 's=build/lang_\(.*\)_list.txt=\1=g')
-
-for lang in $langlist; do
-	find_lang $lang
-done
-
-%{__sed} -i -e '
-	s,%{_libdir}/%{name}/help,%{_datadir}/%{name}/help,;
-	s,%{_libdir}/%{name}/licenses,%{_datadir}/%{name}/licenses,;
-	s,%{_libdir}/%{name}/readmes,%{_datadir}/%{name}/readmes,;
-	s,%{_libdir}/%{name}/share,%{_datadir}/%{name}/share,;
-' *.lang
+dmake install
 
 %clean
 rm -rf $RPM_BUILD_ROOT
