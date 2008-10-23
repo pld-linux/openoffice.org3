@@ -37,26 +37,25 @@
 %undefine	with_system_hsqldb
 %endif
 
-%define		_rc		rc3
 
 Summary:	OpenOffice.org - powerful office suite
 Summary(pl.UTF-8):	OpenOffice.org - potężny pakiet biurowy
 Name:		openoffice.org
-Version:	3.0.0%{_rc}
+Version:	3.0.0
 Release:	0.1
 Epoch:		1
 License:	GPL/LGPL
 Group:		X11/Applications
-Source0:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_core.tar.bz2
-# Source0-md5:	29c1e2fef9747e5cae52350b5c2a2260
-Source1:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_system.tar.bz2
-# Source1-md5:	7312232d0118f4f825c8eaca92991fa8
-Source2:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_binfilter.tar.bz2
-# Source2-md5:	8c167a99d874c484edc900bcb5f46c97
-Source3:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_l10n.tar.bz2
-# Source3-md5:	24081cb2e0295d7c7256a3c48b14ce51
-Source4:	http://openoffice.virginmedia.com/contrib/rc/3.0.0rc3/OOo_%{version}_src_extensions.tar.bz2
-# Source4-md5:	5044613b6241bc5cd5b97f637bc5f92c
+Source0:	http://openoffice.virginmedia.com/stable/3.0.0/OOo_%{version}_src_core.tar.bz2
+# Source0-md5:	ff57567943a0af401819602f04d9bd9f
+Source1:	http://openoffice.virginmedia.com/stable/3.0.0/OOo_%{version}_src_system.tar.bz2
+# Source1-md5:	e2a0f2f99bffed214b802ffda5b96526
+Source2:	http://openoffice.virginmedia.com/stable/3.0.0/OOo_%{version}_src_binfilter.tar.bz2
+# Source2-md5:	98414b82b1e976cd42a0323c80c5b773
+Source3:	http://openoffice.virginmedia.com/stable/3.0.0/OOo_%{version}_src_l10n.tar.bz2
+# Source3-md5:	dde12b88d53220188cf69379e42ef8fc
+Source4:	http://openoffice.virginmedia.com/stable/3.0.0/OOo_%{version}_src_extensions.tar.bz2
+# Source4-md5:	b0ba7be8247b017c8a19f09afebe2b0a
 # patches applied in prep section
 ##Patch0:		%{name}-PLD.patch
 ##Patch1:		%{name}-gcc-Wextra.patch
