@@ -106,7 +106,7 @@ BuildRequires:	gperf
 BuildRequires:	gstreamer-devel >= 0.10.0
 BuildRequires:	gstreamer-plugins-base-devel >= 0.10.0
 BuildRequires:	gtk+2-devel >= 2:2.10
-%{?with_system_hsqldb:BuildRequires:	hsqldb >= 1.8.0.9}
+%{?with_system_hsqldb:BuildRequires:	java-hsqldb}
 %{?with_system_hunspell:BuildRequires:	hunspell-devel >=1.2.2}
 %{?with_icecream:BuildRequires:	icecream}
 BuildRequires:	icu
@@ -264,7 +264,7 @@ Requires(post,postun):	shared-mime-info
 %{?with_system_beanshell:Requires:	beanshell}
 # libcups.so.2 is dlopened (in cupsmgr.cxx); maybe Suggests instead?
 Requires:	cups-lib
-%{?with_system_hsqldb:Requires:	hsqldb >= 1.8.0}
+%{?with_system_hsqldb:Requires:	java-hsqldb}
 Requires:	libstdc++ >= 5:3.2.1
 Requires:	mktemp
 Requires:	sed
